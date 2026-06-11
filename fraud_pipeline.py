@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, split, avg, count
+from pyspark.sql.functions import col, split, avg, count, when
 
 # Creating a spark session
 spark = (SparkSession.builder
@@ -38,3 +38,23 @@ fraud_by_category = (df.groupBy("category")
 )
 
 fraud_by_category.show()
+
+# Calculate fraud rate by transaction amount range
+# when() is PySpark's IF statement - buckets transactions into ranges
+fraud_by_amount = (df
+    .withColumn("amount_range",
+        when(col("amt") < 100, "0-100")
+        .when(col("amt") < 500, "100-500")
+        .when(col("amt") < 1000, "500-1000")
+        .otherwise("1000+")
+    )
+    .groupBy("amount_range")
+    .agg(
+        count("is_fraud").alias("total_transactions"),
+        avg("is_fraud").alias("fraud_rate")
+    )
+    .withColumn("fraud_rate", (col("fraud_rate") * 100).cast("decimal(5,2)"))
+    .orderBy(col("fraud_rate").desc())
+)
+
+fraud_by_amount.show()
