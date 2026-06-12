@@ -60,10 +60,10 @@ fraud_by_amount = (df
 fraud_by_amount.show()
 
 
-
-# Write results to parquet
-# Parquet is the standard big data format - columnar, compressed, fast
-fraud_by_category.write.mode("overwrite").parquet("output/fraud_by_category")
-fraud_by_amount.write.mode("overwrite").parquet("output/fraud_by_amount")
+# Write results to CSV using pandas
+# In production this would be:
+# fraud_by_category.write.mode("overwrite").parquet("s3://bucket/output/fraud_by_category")
+fraud_by_category.toPandas().to_csv("output/fraud_by_category.csv", index=False)
+fraud_by_amount.toPandas().to_csv("output/fraud_by_amount.csv", index=False)
 
 print("Pipeline complete. Results written to output folder.")
