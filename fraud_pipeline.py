@@ -4,6 +4,9 @@ from pyspark.sql.functions import (
 )
 from pyspark.sql.window import Window
 from pyspark.sql.functions import rank
+import os
+
+os.makedirs("output", exist_ok=True)
 
 # Creating a spark session
 
@@ -80,7 +83,6 @@ df.show(5)
 # FRAUD RATE BY CATEGORY
 # ==========================================================
 
-df = df.drop("_c0")
 
 fraud_by_category = (df.groupBy("category")
 .agg(
