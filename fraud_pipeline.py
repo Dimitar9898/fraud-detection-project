@@ -145,6 +145,21 @@ avg("is_fraud").alias("fraud_rate")
 
 fraud_by_hour.show()
 
+# ==========================================================
+# FRAUD RATE BY STATE
+# ==========================================================
+
+fraud_by_state = (df.groupBy("state")
+    .agg(
+        count("is_fraud").alias("total_transactions"),
+        avg("is_fraud").alias("fraud_rate")
+    )
+    .withColumn("fraud_rate", (col("fraud_rate") * 100).cast("decimal(5,2)"))
+    .orderBy(col("fraud_rate").desc())
+)
+
+fraud_by_state.show()
+
 
 # ==========================================================
 # OUTPUTS
