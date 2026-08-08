@@ -1,3 +1,4 @@
+
 An end-to-end PySpark pipeline that analyzes ~555,000 credit card transactions to identify where fraud concentrates: by merchant category, transaction amount, time of day, and geographic location.
 
 What it does
@@ -14,8 +15,15 @@ Key findings
 
 High-value transactions are dramatically riskier. The 1000+ and 500-1000 buckets sit around 17% fraud rate, versus 0.11% for transactions under $100. This pattern isn't uniform across states; for example, some states' riskiest bucket is 500-1000, others' is 1000+, and a few low-volume states show 100% fraud rate in their top bucket purely because they only had one or two transactions in that range (see Limitations). Early morning hours (12am-3am) show a noticeably higher fraud rate (~0.9-1.1%) than the middle of the day (~0.05-0.09%).
 
+Scala Spark port
+
+The amount range by state breakdown was ported to Scala Spark to demonstrate the same partitioned window function logic outside PySpark. It buckets transactions into amount ranges, groups by state and amount range to compute transaction count and fraud rate per group, then uses a ranked window function (partitioned by state, ordered by fraud rate descending) to surface the single riskiest amount range in each state.
+
+One implementation note worth keeping for interviews: rank().over(...) using the native Column API triggered a literal-type resolution issue under Spark 4.2 / Scala 2.13, so the window function was written using expr() with raw SQL window syntax instead, as a stable workaround.
+
 Tech stack
 
 PySpark (SparkSession, DataFrame API, window functions)
+Scala Spark (DataFrame API, partitioned window functions via expr())
 Pandas (final conversion to CSV for output)
 Input: CSV (fraudTest.csv), ~555K rows, 23 columns
